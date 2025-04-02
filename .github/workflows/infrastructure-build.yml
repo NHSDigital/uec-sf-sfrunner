@@ -22,8 +22,12 @@ jobs:
       TASK_VERSION: "3.34.1"
 
     steps:
-      - name: Checkout code
+      - name: Install Task
+        uses: arduino/setup-task@v2
+      - name: Check out code
         uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
       - name: Log into AWS
         uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
