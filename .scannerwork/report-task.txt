@@ -1,7 +1,0 @@
-organization=nhsdigital
-projectKey=uec-dos-sf-api-pca
-serverUrl=https://sonarcloud.io
-serverVersion=8.0.0.61474
-dashboardUrl=https://sonarcloud.io/dashboard?id=uec-dos-sf-api-pca
-ceTaskId=AZYAzfgxAsGVH2xwipdv
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZYAzfgxAsGVH2xwipdv
