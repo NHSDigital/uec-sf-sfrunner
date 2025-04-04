@@ -1,7 +1,7 @@
 pipeline {
 
     agent {
-        label "jenkins-slave"
+        label "jenkins-agent-local"
     }
 
     environment {
@@ -12,7 +12,6 @@ pipeline {
     }
 
     stages {
-
         stage('Prepare Environment') {
             steps {
                 script {
@@ -44,7 +43,6 @@ pipeline {
                 }
             }
         }
-
         stage('Terraform plan and apply') {
             steps {
                 sh "/tmp/task -t taskfile-infra.yml init"

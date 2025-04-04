@@ -1,0 +1,64 @@
+name: Terraform Plan and Apply via Task
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION : eu-west-2
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    env:
+      TASK_VERSION: "3.34.1"
+
+    steps:
+      - name: Install Task
+        uses: arduino/setup-task@v2
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Log into AWS
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: GitHub_to_AWSOIDC
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Detect architecture and install Task
+        id: install-task
+        run: |
+          ARCH=$(uname -m)
+          echo "Detected architecture: $ARCH"
+
+          if [[ "$ARCH" == "x86_64" ]]; then
+            TASK_URL="https://github.com/go-task/task/releases/download/v${TASK_VERSION}/task_linux_amd64.tar.gz"
+          elif [[ "$ARCH" == arm* || "$ARCH" == "aarch64" ]]; then
+            TASK_URL="https://github.com/go-task/task/releases/download/v${TASK_VERSION}/task_linux_arm64.tar.gz"
+          else
+            echo "Unsupported architecture: $ARCH"
+            exit 1
+          fi
+
+          curl -sL "$TASK_URL" -o task.tar.gz
+          tar -xzf task.tar.gz
+          mv task /tmp/task
+          /tmp/task --version
+      - name: Terraform init
+        run: /tmp/task -t taskfile-infra.yml init
+      - name: Terraform plan
+        run: /tmp/task -t taskfile-infra.yml plan
+      # - name: Terraform apply
+      #   run: /tmp/task -t taskfile-infra.yml apply
+      - name: Cleanup Task binary
+        if: always()
+        run: rm -f /tmp/task
